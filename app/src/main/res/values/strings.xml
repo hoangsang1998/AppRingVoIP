@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">RingVoIP</string>
+    <string name="domain">Domain</string>
 </resources>
