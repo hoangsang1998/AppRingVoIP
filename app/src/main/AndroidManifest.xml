@@ -9,7 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Contact.AddFriendActivity"></activity>
+        <activity android:name=".Call.CallOutgoingActivity"></activity>
+        <activity android:name=".Call.CallIncommingActivity" />
+        <activity android:name=".Contact.AddFriendActivity" />
         <activity android:name=".Contact.ContactActivity" />
         <activity android:name=".Chat.ChattingActivity" />
         <activity android:name=".Profile.ProfileActivity" />

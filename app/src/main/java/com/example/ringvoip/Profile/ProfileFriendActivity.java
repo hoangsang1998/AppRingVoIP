@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.ringvoip.Call.CallOutgoingActivity;
+import com.example.ringvoip.Chat.ChattingActivity;
 import com.example.ringvoip.R;
 
 public class ProfileFriendActivity extends AppCompatActivity {
@@ -22,7 +24,7 @@ public class ProfileFriendActivity extends AppCompatActivity {
         addControls();
         addVariables();
         Intent intent = getIntent();
-        txtName.setText(intent.getStringExtra("userName"));
+        txtName.setText(intent.getStringExtra("userFriend"));
         txtSip.setText(intent.getStringExtra("sipUri"));
     }
 
@@ -49,24 +51,24 @@ public class ProfileFriendActivity extends AppCompatActivity {
     }
 
     public void imgCallVideoEvent(View view) {
-//        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
-//        startActivity(intentCallVideo);
+        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
+        startActivity(intentCallVideo);
     }
 
     public void imgCallEvent(View view) {
-//        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
-//        startActivity(intentCallVideo);
+        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
+        startActivity(intentCallVideo);
     }
 
     public void imgChatEvent(View view) {
-//        if (isChattingActivity.equals("true")) {
-//            finish();
-//        } else {
-//            Intent intentChat = new Intent(ProfileFriendActivity.this, ChattingActivity.class);
-//            intentChat.putExtra("userFriend", userFriend);
-//            intentChat.putExtra("sipUri", sipUri);
-////            intentChat.putExtra("user_contact", contact_username);
-//            startActivity(intentChat);
-//        }
+        if (isChattingActivity.equals("true")) {
+            finish();
+        } else {
+            Intent intentChat = new Intent(ProfileFriendActivity.this, ChattingActivity.class);
+            intentChat.putExtra("userFriend", userFriend);
+            intentChat.putExtra("sipUri", sipUri);
+//            intentChat.putExtra("user_contact", contact_username);
+            startActivity(intentChat);
+        }
     }
 }

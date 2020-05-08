@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.ringvoip.Call.CallOutgoingActivity;
 import com.example.ringvoip.Profile.ProfileFriendActivity;
 import com.example.ringvoip.R;
 
@@ -100,13 +101,13 @@ public class ChattingActivity extends AppCompatActivity {
     }
 
     public void btnCallVideoEvent(View view) {
-//        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
-//        startActivity(intentCallVideo);
+        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
+        startActivity(intentCallVideo);
     }
 
     public void btnCallEvent(View view) {
-//        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
-//        startActivity(intentCallVideo);
+        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
+        startActivity(intentCallVideo);
     }
 
     public void imgFriendEvent(View view) {
@@ -114,7 +115,7 @@ public class ChattingActivity extends AppCompatActivity {
         Intent intentFriendProfile = new Intent(this, ProfileFriendActivity.class);
         intentFriendProfile.putExtra("userName", intent.getStringExtra("userName"));
         intentFriendProfile.putExtra("userFriend", intent.getStringExtra("userFriend"));
-        intentFriendProfile.putExtra("sipUri", intent.getStringExtra("userName") + "@hoangsang1998.com.vn");
+        intentFriendProfile.putExtra("sipUri", intent.getStringExtra("userFriend") + "@hoangsang1998.com.vn");
         String isChattingActivity = "true";
         intentFriendProfile.putExtra("isChattingActivity", isChattingActivity);
         startActivity(intentFriendProfile);
