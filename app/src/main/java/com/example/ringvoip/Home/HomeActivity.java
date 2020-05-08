@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.ringvoip.Profile.ProfileActivity;
 import com.example.ringvoip.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -140,8 +141,8 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
     }
 
     public void imgUserNameEvent(View view) {
-//        Intent intentProfile = new Intent(this, ProfileActivity.class);
-//        startActivity(intentProfile);
+        Intent intentProfile = new Intent(this, ProfileActivity.class);
+        startActivity(intentProfile);
     }
 
     @Override
