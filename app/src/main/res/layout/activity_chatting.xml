@@ -112,7 +112,7 @@
             android:autofillHints=""
             android:ellipsize="none"
             android:ems="10"
-            android:hint="type_a_message"
+            android:hint="@string/type_a_message"
             android:inputType="textMultiLine"
             android:padding="15dp"
             android:scrollHorizontally="false" />

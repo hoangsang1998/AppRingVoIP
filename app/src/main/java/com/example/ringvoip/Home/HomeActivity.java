@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.ringvoip.Chat.ChattingActivity;
+import com.example.ringvoip.Contact.ContactActivity;
 import com.example.ringvoip.Profile.ProfileActivity;
 import com.example.ringvoip.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -65,10 +66,10 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
                 case R.id.navigation_chat:
                     break;
                 case R.id.navigation_contact:
-//                    Intent intent_contact = new Intent(HomeActivity.this, ContactActivity.class);
-////                    intent_groupchat.putExtra("username", username);
-////                    intent_groupchat.putExtra("sipuri", sipuri);
-//                    startActivity(intent_contact);
+                    Intent intent_contact = new Intent(HomeActivity.this, ContactActivity.class);
+//                    intent_groupchat.putExtra("username", username);
+//                    intent_groupchat.putExtra("sipuri", sipuri);
+                    startActivity(intent_contact);
                     break;
             }
             return false;
