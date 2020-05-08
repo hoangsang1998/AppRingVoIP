@@ -17,6 +17,7 @@ import org.linphone.core.Core;
 import org.linphone.core.CoreListenerStub;
 import org.linphone.core.Factory;
 import org.linphone.core.LogCollectionState;
+import org.linphone.core.MediaDirection;
 import org.linphone.core.tools.Log;
 import org.linphone.mediastream.Version;
 
@@ -151,18 +152,18 @@ public class LinphoneService extends Service {
     }
 
     @Override
-//    public void onDestroy() {
-//        mCore.removeListener(mCoreListener);
-//        mTimer.cancel();
-//        mCore.stop();
-//        // A stopped Core can be started again
-//        // To ensure resources are freed, we must ensure it will be garbage collected
-//        mCore = null;
-//        // Don't forget to free the singleton as well
-//        sInstance = null;
-//
-//        super.onDestroy();
-//    }
+    public void onDestroy() {
+        mCore.removeListener(mCoreListener);
+        mTimer.cancel();
+        mCore.stop();
+        // A stopped Core can be started again
+        // To ensure resources are freed, we must ensure it will be garbage collected
+        mCore = null;
+        // Don't forget to free the singleton as well
+        sInstance = null;
+
+        super.onDestroy();
+    }
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {

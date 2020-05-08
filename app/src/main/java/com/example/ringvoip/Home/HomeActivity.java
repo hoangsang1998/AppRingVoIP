@@ -28,6 +28,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import org.linphone.core.CoreListenerStub;
 import org.linphone.core.ProxyConfig;
+import org.linphone.core.RegistrationState;
 import org.linphone.core.tools.Log;
 
 import java.util.ArrayList;
@@ -90,7 +91,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
         // we add a chance to register the above listener
         ProxyConfig proxyConfig = LinphoneService.getCore().getDefaultProxyConfig();
         if (proxyConfig != null) {
-//            updateLed(proxyConfig.getState());
+            updateLed(proxyConfig.getState());
         } else {
 //             No account configured, we display the configuration activity
             startActivity(new Intent(this, LoginActivity.class));
@@ -159,6 +160,25 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
             String[] permissions = new String[permissionsList.size()];
             permissions = permissionsList.toArray(permissions);
             ActivityCompat.requestPermissions(this, permissions, 0);
+        }
+    }
+
+    private void updateLed(RegistrationState state) {
+        switch (state) {
+            case Ok: // This state means you are connected, to can make and receive calls & messages
+//                mLed.setImageResource(R.drawable.led_connected);
+                break;
+            case None: // This state is the default state
+            case Cleared: // This state is when you disconnected
+//                mLed.setImageResource(R.drawable.led_disconnected);
+                break;
+            case Failed: // This one means an error happened, for example a bad password
+//                mLed.setImageResource(R.drawable.led_error);
+                startActivity(new Intent(this, LoginActivity.class));
+                break;
+            case Progress: // Connection is in progress, next state will be either Ok or Failed
+//                mLed.setImageResource(R.drawable.led_inprogress);
+                break;
         }
     }
 
