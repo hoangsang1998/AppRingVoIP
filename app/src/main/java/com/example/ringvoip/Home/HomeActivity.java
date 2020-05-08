@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.ringvoip.Chat.ChattingActivity;
 import com.example.ringvoip.Profile.ProfileActivity;
 import com.example.ringvoip.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -147,14 +148,14 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
 
     @Override
     public void onDataChatClick(View view, int position) {
-//        Intent intentChat = new Intent(HomeActivity.this, ChattingActivity.class);
-//        intentChat.putExtra("userName", username);
-//        intentChat.putExtra("sipUri", sipuri);
-//        intentChat.putExtra("userFriend",
-//                getUserContact(chatRoomList.get(position).getUsername1(),
-//                        chatRoomList.get(position).getUsername2(),
-//                        username));
-//        startActivity(intentChat);
+        Intent intentChat = new Intent(HomeActivity.this, ChattingActivity.class);
+        intentChat.putExtra("userName", username);
+        intentChat.putExtra("sipUri", sipuri);
+        intentChat.putExtra("userFriend",
+                getUserContact(chatRoomList.get(position).getUsername1(),
+                        chatRoomList.get(position).getUsername2(),
+                        username));
+        startActivity(intentChat);
     }
 
     public static String getUserContact(String username1, String username2, String username) {

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Chat.ChattingActivity">
+
+    <LinearLayout
+        android:id="@+id/layout_header_chatting"
+        android:layout_width="match_parent"
+        android:layout_height="69dp"
+        android:minHeight="69dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0">
+
+        <ImageView
+            android:id="@+id/img_avt_friend"
+            android:padding="3dp"
+            android:layout_marginLeft="12dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:onClick="imgFriendEvent"
+            app:srcCompat="@drawable/img_user"
+            android:layout_marginStart="12dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtv_name"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:gravity="bottom"
+                android:textColor="#28638C"
+                android:paddingStart="15dp"
+                android:paddingLeft="15dp"
+                android:textSize="22sp"
+                android:text="friend_s_name"
+                tools:ignore="RtlSymmetry" />
+
+            <TextView
+                android:id="@+id/txtv_status"
+                android:layout_width="match_parent"
+                android:layout_height="24dp"
+                android:paddingLeft="15dp"
+                android:textSize="14sp"
+                android:paddingStart="15dp" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/img_but_video"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:background="@null"
+            android:onClick="btnCallVideoEvent"
+            app:srcCompat="@drawable/camera" />
+
+        <ImageButton
+            android:id="@+id/img_but_voice"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:onClick="btnCallEvent"
+            android:background="@null"
+            app:srcCompat="@drawable/call" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/mRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/linearLayout"
+        android:layout_below="@+id/layout_header_chatting"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:background="#fff"
+        android:layout_alignParentEnd="true" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="#fff"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
+
+        <EditText
+            android:id="@+id/etxt_message"
+            android:layout_width="match_parent"
+            android:layout_height="57dp"
+            android:layout_margin="8dp"
+            android:layout_weight="1"
+            android:autofillHints=""
+            android:ellipsize="none"
+            android:ems="10"
+            android:hint="type_a_message"
+            android:inputType="textMultiLine"
+            android:padding="15dp"
+            android:scrollHorizontally="false" />
+
+        <Button
+            android:id="@+id/btn_send_message"
+            android:layout_width="236dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_weight="3"
+            android:onClick="btnSendMessageEvent"
+            android:background="@drawable/send"
+            android:paddingHorizontal="20dp"/>
+    </LinearLayout>
+
+</RelativeLayout>
