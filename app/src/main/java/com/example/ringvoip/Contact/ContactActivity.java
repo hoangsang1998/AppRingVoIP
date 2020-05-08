@@ -111,8 +111,8 @@ public class ContactActivity extends AppCompatActivity implements AdapterContact
     }
 
     public void btnAddFriendEvent(View view) {
-//        Intent intentAddFriend = new Intent(this, AddFriendActivity.class);
-//        startActivity(intentAddFriend);
+        Intent intentAddFriend = new Intent(this, AddFriendActivity.class);
+        startActivity(intentAddFriend);
     }
 
     public void initView() {
