@@ -60,6 +60,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onRegistrationStateChanged(Core core, ProxyConfig cfg, RegistrationState state, String message) {
                 if (state == RegistrationState.Ok) {
+                    startActivity(new Intent(LoginActivity.this, HomeActivity.class));
                     finish();
                 } else if (state == RegistrationState.Failed) {
                     Toast.makeText(LoginActivity.this, "Failure: " + message, Toast.LENGTH_LONG).show();
@@ -127,6 +128,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void configureAccount() {
+        LinphoneService.getCore().clearAllAuthInfo();
+        LinphoneService.getCore().clearProxyConfig();
         // At least the 3 below values are required
         mAccountCreator.setUsername(txtUserName.getText().toString());
         mAccountCreator.setDomain(txtDomain.getText().toString());

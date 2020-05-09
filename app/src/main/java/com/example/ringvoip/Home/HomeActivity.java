@@ -56,6 +56,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
 
 //        username = intent.getStringExtra("username");
         username="sang";
+        txtUserName.setText(LinphoneService.getCore().getIdentity());
         sipuri = intent.getStringExtra("sipuri");
         ChatRoomClass chatRoomClass = new ChatRoomClass("sang", "quynh","hello","2020-03-30 | 10:59:27" );
         ChatRoomClass chatRoomClass1 = new ChatRoomClass("sang", "thang","hello","2020-03-30 | 10:59:27" );
@@ -76,7 +77,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
 
         // Ask runtime permissions, such as record audio and camera
         // We don't need them here but once the user has granted them we won't have to ask again
-        checkAndRequestCallPermissions();
+//        checkAndRequestCallPermissions();
     }
 
     @Override

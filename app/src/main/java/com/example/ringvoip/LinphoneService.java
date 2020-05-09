@@ -34,13 +34,21 @@ public class LinphoneService extends Service {
     private static LinphoneService sInstance;
 
     private Handler mHandler;
-    private Timer mTimer;
+    public static Timer mTimer;
 
     private Core mCore;
-    private CoreListenerStub mCoreListener;
+    public static CoreListenerStub mCoreListener;
 
     public static boolean isReady() {
         return sInstance != null;
+    }
+
+    public static CoreListenerStub getCoreListener() {
+        return mCoreListener;
+    }
+
+    public static void cancelTimer() {
+        mTimer.cancel();
     }
 
     public static LinphoneService getInstance() {
@@ -154,14 +162,19 @@ public class LinphoneService extends Service {
     @Override
     public void onDestroy() {
         mCore.removeListener(mCoreListener);
+        mCore.setDefaultProxyConfig(null);
         mTimer.cancel();
+        mCore.stop();
+
+        mCore.start();
+        mCore.clearAllAuthInfo();
+        mCore.clearProxyConfig();
         mCore.stop();
         // A stopped Core can be started again
         // To ensure resources are freed, we must ensure it will be garbage collected
         mCore = null;
         // Don't forget to free the singleton as well
         sInstance = null;
-
         super.onDestroy();
     }
 
