@@ -9,10 +9,17 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ringvoip.Call.CallOutgoingActivity;
 import com.example.ringvoip.Profile.ProfileFriendActivity;
 import com.example.ringvoip.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -22,29 +29,83 @@ public class ChattingActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     AdapterConversation adapterConversation;
     ArrayList<ChatMessageClass> arrayList;
-    String username;
+    String username, contact_user, chatRoom;
     EditText txtMessage;
+
+    FirebaseDatabase database;
+    DatabaseReference db_chatRoom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatting);
+        addVariables();
         addControls();
         addEvents();
+        loadConversations();
+
+
+        txtFriendName.setText(contact_user);
+
+    }
+
+    private void addVariables() {
         Intent intent = getIntent();
         username = intent.getStringExtra("userName");
-        txtFriendName.setText(intent.getStringExtra("userFriend"));
-        ChatMessageClass chatMessageClass = new ChatMessageClass("sang", "hiiii", "2020-03-30 | 10:59:27");
-        ChatMessageClass chatMessageClass2 = new ChatMessageClass("sang1", "hiiii2", "2020-03-30 | 10:59:27");
-        ChatMessageClass chatMessageClass3 = new ChatMessageClass("sang2", "hiiii3", "2020-03-30 | 10:59:27");
-        ChatMessageClass chatMessageClass4 = new ChatMessageClass("sang", "hiii4", "2020-03-30 | 10:59:27");
-        ChatMessageClass chatMessageClass5 = new ChatMessageClass("sang4", "hiiii5", "2020-03-30 | 10:59:27");
-        arrayList.add(chatMessageClass);
-        arrayList.add(chatMessageClass2);
-        arrayList.add(chatMessageClass3);
-        arrayList.add(chatMessageClass4);
-        arrayList.add(chatMessageClass5);
-        chatBoxView(0);
+        contact_user = intent.getStringExtra("userFriend");
+        database = FirebaseDatabase.getInstance();
+        chatRoom = getChatRoomByTwoUsername(username, contact_user);
+        db_chatRoom = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatlogs/" + chatRoom);
+    }
+
+    public static String getChatRoomByTwoUsername(String username1, String username2) {
+        String[] myArray = {username1, username2};
+        StringBuilder result = new StringBuilder();
+        int size = myArray.length;
+        for (int i = 0; i < size - 1; i++) {
+            for (int j = i + 1; j < myArray.length; j++) {
+                if (myArray[i].compareTo(myArray[j]) > 0) {
+                    String temp = myArray[i];
+                    myArray[i] = myArray[j];
+                    myArray[j] = temp;
+                }
+            }
+        }
+        for (int i = 0; i < size; i++) {
+            if (i == 0) {
+                result.append(myArray[i]);
+            } else {
+                result.append("&").append(myArray[i]);
+            }
+        }
+        return result.toString();
+    }
+
+    private void loadConversations() {
+        final Query listMessage = db_chatRoom;
+        listMessage.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //get data when after update message
+                if (dataSnapshot.exists()) {// get data when first open
+                    if (!arrayList.isEmpty()) arrayList.clear();
+                    for (DataSnapshot item : dataSnapshot.getChildren()) {
+                        arrayList.add(item.getValue(ChatMessageClass.class));
+                    }
+//                    isFirstLoad = false;
+                    chatBoxView(0);
+                    listMessage.removeEventListener(this);
+                } else {
+                    return;
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Error load database", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void addControls() {

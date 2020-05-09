@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "836551207347",
+    "firebase_url": "https://dbappchat-bbabc.firebaseio.com",
+    "project_id": "dbappchat-bbabc",
+    "storage_bucket": "dbappchat-bbabc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:836551207347:android:24e04277a4e33e110843c6",
+        "android_client_info": {
+          "package_name": "com.example.ringvoip"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "836551207347-e2qmkmrjhdqe0f4earlifg13ep43rvps.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.ringvoip",
+            "certificate_hash": "727e7dd536d02929f4eab09364534d31b9990454"
+          }
+        },
+        {
+          "client_id": "836551207347-7jto0c77s2feb9nbpkdp457jcq8le5vm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIUcPoBq3jLYaoezeCPgqbW3zTSPTsNg0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "836551207347-7jto0c77s2feb9nbpkdp457jcq8le5vm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -14,12 +14,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ringvoip.Chat.ChattingActivity;
 import com.example.ringvoip.Contact.ContactActivity;
 import com.example.ringvoip.Profile.ProfileActivity;
 import com.example.ringvoip.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +40,9 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
     ArrayList<ChatRoomClass> chatRoomList;
     String username, sipuri;
 
+    FirebaseDatabase database;
+    DatabaseReference db_chatRoom;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,21 +50,43 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
         addControls();
         addEvents();
         addVariables();
+        loadHome();
         Intent intent = getIntent();
 //        username = intent.getStringExtra("username");
         username="sang";
         sipuri = intent.getStringExtra("sipuri");
-        ChatRoomClass chatRoomClass = new ChatRoomClass("sang", "quynh","hello","2020-03-30 | 10:59:27" );
-        ChatRoomClass chatRoomClass1 = new ChatRoomClass("sang", "thang","hello","2020-03-30 | 10:59:27" );
-        ChatRoomClass chatRoomClass2 = new ChatRoomClass("sang", "vi","hello","2020-03-30 | 10:59:27" );
-        ChatRoomClass chatRoomClass3 = new ChatRoomClass("sang", "duy","hello","2020-03-30 | 10:59:27" );
-        ChatRoomClass chatRoomClass4 = new ChatRoomClass("sang", "nhan","hello","2020-03-30 | 10:59:27" );
-        chatRoomList.add(chatRoomClass);
-        chatRoomList.add(chatRoomClass1);
-        chatRoomList.add(chatRoomClass2);
-        chatRoomList.add(chatRoomClass3);
-        chatRoomList.add(chatRoomClass4);
-        initView();
+    }
+
+    private void loadHome() {
+        final Query listChatRoomRemain = db_chatRoom.getRef()
+                .orderByKey()
+                .startAt("&" + username + "&")
+                .endAt("\uf8ff");
+        listChatRoomRemain.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //get data when after update meessage
+                if (dataSnapshot.exists()) {// get data whem first open
+                    if (!chatRoomList.isEmpty()) chatRoomList.clear();
+                    for (DataSnapshot item : dataSnapshot.getChildren()) {
+                        if (item.child("username1").getValue() != null && item.child("username1").getValue() != null) {
+                            if (item.child("username1").getValue().equals(username) || item.child("username2")
+                                    .getValue()
+                                    .equals(username)) {
+                                chatRoomList.add(item.getValue(ChatRoomClass.class));
+                            }
+                        }
+                    }
+                    initView();
+                    listChatRoomRemain.removeEventListener(this);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Error loading database", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener
@@ -129,6 +161,8 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
 
     private void addVariables() {
         chatRoomList = new ArrayList<>();
+        database = FirebaseDatabase.getInstance();
+        db_chatRoom = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatrooms");
     }
 
     private void addEvents() {
