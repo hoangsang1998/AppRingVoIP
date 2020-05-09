@@ -1,19 +1,25 @@
 package com.example.ringvoip.Chat;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ringvoip.Call.CallOutgoingActivity;
+import com.example.ringvoip.Home.ChatRoomClass;
+import com.example.ringvoip.LinphoneService;
 import com.example.ringvoip.Profile.ProfileFriendActivity;
 import com.example.ringvoip.R;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -21,7 +27,19 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import org.linphone.core.Address;
+import org.linphone.core.ChatMessage;
+import org.linphone.core.ChatMessageListenerStub;
+import org.linphone.core.ChatRoom;
+import org.linphone.core.Core;
+import org.linphone.core.CoreListenerStub;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 public class ChattingActivity extends AppCompatActivity {
 
@@ -33,7 +51,12 @@ public class ChattingActivity extends AppCompatActivity {
     EditText txtMessage;
 
     FirebaseDatabase database;
-    DatabaseReference db_chatRoom;
+    DatabaseReference db_chatRoom, db_room, db_listMessage, db_chatlogs;
+    ChatMessageClass newMessage;
+    ChatRoomClass chatroomlog;
+    Query listMessage;
+    CoreListenerStub coreListenerStub;
+    ChatMessageListenerStub messageListenerStub;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,9 +67,67 @@ public class ChattingActivity extends AppCompatActivity {
         addEvents();
         loadConversations();
 
-
         txtFriendName.setText(contact_user);
 
+    }
+
+    public void btnCallVideoEvent(View view) {
+        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
+        startActivity(intentCallVideo);
+    }
+
+    public void btnCallEvent(View view) {
+        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
+        startActivity(intentCallVideo);
+    }
+
+    public void imgFriendEvent(View view) {
+        Intent intent = getIntent();
+        Intent intentFriendProfile = new Intent(this, ProfileFriendActivity.class);
+        intentFriendProfile.putExtra("userName", intent.getStringExtra("userName"));
+        intentFriendProfile.putExtra("userFriend", intent.getStringExtra("userFriend"));
+        intentFriendProfile.putExtra("sipUri", intent.getStringExtra("userFriend") + "@hoangsang1998.com.vn");
+        String isChattingActivity = "true";
+        intentFriendProfile.putExtra("isChattingActivity", isChattingActivity);
+        startActivity(intentFriendProfile);
+    }
+
+    public void btnSendMessageEvent(View view) {
+        if (!txtMessage.getText().toString().trim().equals("")) {
+            txtMessage.setText(txtMessage.getText().toString().trim());
+            //send message to server
+            Core core = LinphoneService.getCore();
+            String contactUserDomain = LinphoneService.getCore().getIdentity().split("@")[1];
+            String contactUserUri = "sip:" + contact_user + "@" + contactUserDomain;
+            Address address = core.interpretUrl(contactUserUri);
+            ChatRoom chatRoom = core.createChatRoom(address);
+            if (chatRoom != null) {
+                ChatMessage chatMessage = chatRoom.createEmptyMessage();
+                chatMessage.addCustomHeader("fromApp", "RingVoIP");
+                chatMessage.addTextContent(txtMessage.getText().toString());
+                if (chatMessage.getTextContent() != null) {
+                    chatRoom.sendChatMessage(chatMessage);
+                } else {
+                    txtMessage.requestFocus();
+                }
+            } else {
+                Log.e("ERROR: ", "Cannot create chat room");
+            }
+            //them vao firebase
+            newMessage = new ChatMessageClass(username, txtMessage.getText().toString(), getStringDateTime());
+            db_chatRoom.push().setValue(newMessage);
+            chatroomlog.setUsername1(username);
+            chatroomlog.setUsername2(contact_user);
+            chatroomlog.setContext(newMessage.getContext());
+            chatroomlog.setDatetime(getStringDateTimeChatRoom());
+            db_room.setValue(chatroomlog);
+            //them vao GUI
+//            if (!arrayList.isEmpty()) arrayList.clear();
+            arrayList.add(newMessage);
+            adapterConversation.addItem(arrayList);
+            recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
+        }
+        txtMessage.setText("");
     }
 
     private void addVariables() {
@@ -56,32 +137,18 @@ public class ChattingActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         chatRoom = getChatRoomByTwoUsername(username, contact_user);
         db_chatRoom = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatlogs/" + chatRoom);
+        chatroomlog = new ChatRoomClass();
+        db_room = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatrooms/" + chatRoom);
+
+        db_listMessage = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatlogs/" + chatRoom);
+        listMessage = db_listMessage;
+        db_chatlogs = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatlogs/");
     }
 
-    public static String getChatRoomByTwoUsername(String username1, String username2) {
-        String[] myArray = {username1, username2};
-        StringBuilder result = new StringBuilder();
-        int size = myArray.length;
-        for (int i = 0; i < size - 1; i++) {
-            for (int j = i + 1; j < myArray.length; j++) {
-                if (myArray[i].compareTo(myArray[j]) > 0) {
-                    String temp = myArray[i];
-                    myArray[i] = myArray[j];
-                    myArray[j] = temp;
-                }
-            }
-        }
-        for (int i = 0; i < size; i++) {
-            if (i == 0) {
-                result.append(myArray[i]);
-            } else {
-                result.append("&").append(myArray[i]);
-            }
-        }
-        return result.toString();
-    }
+
 
     private void loadConversations() {
+        //get message
         final Query listMessage = db_chatRoom;
         listMessage.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -92,13 +159,11 @@ public class ChattingActivity extends AppCompatActivity {
                     for (DataSnapshot item : dataSnapshot.getChildren()) {
                         arrayList.add(item.getValue(ChatMessageClass.class));
                     }
-//                    isFirstLoad = false;
                     chatBoxView(0);
                     listMessage.removeEventListener(this);
                 } else {
                     return;
                 }
-
             }
 
             @Override
@@ -106,6 +171,41 @@ public class ChattingActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Error load database", Toast.LENGTH_SHORT).show();
             }
         });
+
+//        listMessage.addChildEventListener(childEventListener = new ChildEventListener() {
+//            //when chat in room
+//            @Override
+//            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+//                if (dataSnapshot.exists()) {
+//                    arrayList.add(dataSnapshot.getValue(ChatMessageClass.class));
+//
+////                    adapterConversation.addItem(arrayList);
+////                    recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
+////                    chatBoxView(0);
+//
+//                }
+//            }
+//
+//            @Override
+//            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+//
+//            }
+//
+//            @Override
+//            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+//
+//            }
+//
+//            @Override
+//            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+//
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
     }
 
     private void addControls() {
@@ -114,15 +214,72 @@ public class ChattingActivity extends AppCompatActivity {
         arrayList = new ArrayList<>();
         txtMessage = findViewById(R.id.etxt_message);
     }
+
     private void addEvents() {
+        //khi nhan duoc tin nhan tu server
+        coreListenerStub = new CoreListenerStub() {
+            @Override
+            public void onMessageReceived(Core lc, ChatRoom room, ChatMessage message) {
+                if (room != null) {
+                    if (message.hasTextContent()) {
+                        String messageTime = new SimpleDateFormat("dd-MM-yyyy | HH:mm").format(new Date(message.getTime() * 1000L));
+                        String messageContent = message.getTextContent();
+                        String messageFrom = message.getFromAddress().getUsername();
+                        ChatMessageClass chatMessageClass = new ChatMessageClass(messageFrom, messageContent, messageTime);
+                        //display received message when at ChattingActivity with the sender
+                        if (message.getCustomHeader("group") == null && !message.getFromAddress().getUsername().equals(username)) {
+                            if (message.getFromAddress().getUsername().equals(contact_user)) {
 
+                                List<ChatMessageClass> chatMessages = new ArrayList<>();
+                                if (!chatMessages.isEmpty()) chatMessages.clear();
+                                chatMessages.add(chatMessageClass);
+                                //add to GUI
+                                adapterConversation.addItem(chatMessages);
+                                recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        //khi nhan tin thanh cong tren server
+//        messageListenerStub = new ChatMessageListenerStub() {
+//            @Override
+//            public void onMsgStateChanged(ChatMessage msg, ChatMessage.State state) {
+//                if (state.equals(ChatMessage.State.Delivered)
+//                        || state.equals(ChatMessage.State.DeliveredToUser)
+//                        || state.equals(ChatMessage.State.Displayed)) {
+//
+//                    //them vao firebase
+//                    newMessage = new ChatMessageClass(username, txtMessage.getText().toString(), getStringDateTime());
+//                    db_chatRoom.push().setValue(newMessage);
+//                    chatroomlog.setContext(newMessage.getContext());
+//                    chatroomlog.setDatetime(getStringDateTimeChatRoom());
+//                    db_room.setValue(chatroomlog);
+//
+//                    //them vao GUI
+//                    List<ChatMessageClass> chatMessages = new ArrayList<>();
+//                    if (!chatMessages.isEmpty()) chatMessages.clear();
+//                    chatMessages.add(newMessage);
+//                    adapterConversation.addItem(chatMessages);
+//                    recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
+//
+//
+//                    txtMessage.getText().clear();
+//                    msg.removeListener(messageListenerStub);
+////                    Toast.makeText(ChattingActivity.this, "Message delivered", Toast.LENGTH_SHORT).show();
+//                }
+//                if (state.equals(ChatMessage.State.NotDelivered)) {
+//                    msg.removeListener(messageListenerStub);
+////                    Toast.makeText(ChattingActivity.this, "Message not delivered", Toast.LENGTH_LONG).show();
+//                }
+//            }
+//        };
     }
 
-    public void btnSendMessageEvent(View view) {
-        if (!txtMessage.getText().toString().trim().equals("")) {
 
-        }
-    }
+
+
 
     public void chatBoxView(int delayTime) {
         recyclerView.setHasFixedSize(true);
@@ -161,24 +318,44 @@ public class ChattingActivity extends AppCompatActivity {
         });
     }
 
-    public void btnCallVideoEvent(View view) {
-        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
-        startActivity(intentCallVideo);
+    // datetime string for message
+    public static String getStringDateTime() {
+        String result = "";
+        Date currentTime = Calendar.getInstance().getTime();
+        SimpleDateFormat formatterNew = new SimpleDateFormat("dd-MM-yyyy | HH:mm", Locale.getDefault());
+        result = formatterNew.format(currentTime);
+        return result;
     }
 
-    public void btnCallEvent(View view) {
-        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
-        startActivity(intentCallVideo);
+    // datetime string for chatroom
+    public static String getStringDateTimeChatRoom() {
+        String result = "";
+        Date currentTime = Calendar.getInstance().getTime();
+        SimpleDateFormat formatterNew = new SimpleDateFormat("yyyy-MM-dd | HH:mm:ss", Locale.getDefault());
+        result = formatterNew.format(currentTime);
+        return result;
     }
 
-    public void imgFriendEvent(View view) {
-        Intent intent = getIntent();
-        Intent intentFriendProfile = new Intent(this, ProfileFriendActivity.class);
-        intentFriendProfile.putExtra("userName", intent.getStringExtra("userName"));
-        intentFriendProfile.putExtra("userFriend", intent.getStringExtra("userFriend"));
-        intentFriendProfile.putExtra("sipUri", intent.getStringExtra("userFriend") + "@hoangsang1998.com.vn");
-        String isChattingActivity = "true";
-        intentFriendProfile.putExtra("isChattingActivity", isChattingActivity);
-        startActivity(intentFriendProfile);
+    public static String getChatRoomByTwoUsername(String username1, String username2) {
+        String[] myArray = {username1, username2};
+        StringBuilder result = new StringBuilder();
+        int size = myArray.length;
+        for (int i = 0; i < size - 1; i++) {
+            for (int j = i + 1; j < myArray.length; j++) {
+                if (myArray[i].compareTo(myArray[j]) > 0) {
+                    String temp = myArray[i];
+                    myArray[i] = myArray[j];
+                    myArray[j] = temp;
+                }
+            }
+        }
+        for (int i = 0; i < size; i++) {
+            if (i == 0) {
+                result.append(myArray[i]);
+            } else {
+                result.append("&").append(myArray[i]);
+            }
+        }
+        return result.toString();
     }
 }

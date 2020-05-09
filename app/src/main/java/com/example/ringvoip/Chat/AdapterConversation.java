@@ -124,7 +124,7 @@ public class AdapterConversation extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     public void addItem(List<ChatMessageClass> chatMessages) {
-        this.chatMessages.addAll(chatMessages);
+//        this.chatMessages.addAll(chatMessages);
         notifyDataSetChanged();
     }
 
