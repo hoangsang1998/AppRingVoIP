@@ -15,7 +15,7 @@
         <TextView
             android:id="@+id/txtUserName"
             android:layout_width="match_parent"
-            android:layout_height="30dp"
+            android:layout_height="wrap_content"
             android:text="Danh bạ"
             android:textColor="#fff"
             android:paddingVertical="0dp"

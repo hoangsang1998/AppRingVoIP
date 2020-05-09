@@ -73,7 +73,7 @@
         android:ems="10"
         android:hint="domain"
         android:inputType="text"
-        android:text="sipphone.vn"
+        android:text="192.168.0.104"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etxt_password" />
@@ -84,7 +84,6 @@
         android:layout_height="wrap_content"
         android:padding="18dp"
         android:text="Login"
-        android:onClick="btnLoginEvent"
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
