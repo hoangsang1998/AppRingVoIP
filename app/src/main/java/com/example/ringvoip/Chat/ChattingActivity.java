@@ -70,6 +70,66 @@ public class ChattingActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //nhan tin tu server
+        coreListenerStub = new CoreListenerStub() {
+            @Override
+            public void onMessageReceived(Core lc, ChatRoom room, ChatMessage message) {
+                if (room != null) {
+                    if (message.hasTextContent()) {
+                        String messageTime = new SimpleDateFormat("dd-MM-yyyy | HH:mm").format(new Date(message.getTime() * 1000L));
+                        String messageContent = message.getTextContent();
+                        String messageFrom = message.getFromAddress().getUsername();
+                        ChatMessageClass chatMessageClass = new ChatMessageClass(messageFrom, messageContent, messageTime);
+                        //display received message when at ChattingActivity with the sender
+                        if (message.getCustomHeader("group") == null && !message.getFromAddress().getUsername().equals(username)) {
+                            if (message.getFromAddress().getUsername().equals(contact_user)) {
+
+//                                List<ChatMessageClass> chatMessages = new ArrayList<>();
+//                                if (!chatMessages.isEmpty()) chatMessages.clear();
+//                                chatMessages.add(chatMessageClass);
+                                //add to GUI
+//                                adapterConversation.addItem(chatMessages);
+//                                recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
+
+                                //them vao firebase neu la app khac gui tin nhan vao
+//                                newMessage = new ChatMessageClass(username, txtMessage.getText().toString(), getStringDateTime());
+                                if(message.getCustomHeader("fromApp") == null) {
+                                    //luu neu k co getCustomHeader
+                                    db_chatRoom.push().setValue(chatMessageClass);
+                                    chatroomlog.setUsername1(contact_user);
+                                    chatroomlog.setUsername2(username);
+                                    chatroomlog.setContext(chatMessageClass.getContext());
+                                    chatroomlog.setDatetime(getStringDateTimeChatRoom());
+                                    db_room.setValue(chatroomlog);
+                                }
+
+                                //them vao GUI
+                                arrayList.add(chatMessageClass);
+                                if(adapterConversation == null) {
+                                    chatBoxView(0);
+                                } else {
+                                    adapterConversation.addItem(arrayList);
+                                }
+
+                                recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        LinphoneService.getCore().addListener(coreListenerStub);
+    }
+
+    @Override
+    protected void onPause() {
+        LinphoneService.getCore().removeListener(coreListenerStub);
+        super.onPause();
+    }
+
     public void btnCallVideoEvent(View view) {
         Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
         startActivity(intentCallVideo);
@@ -112,6 +172,7 @@ public class ChattingActivity extends AppCompatActivity {
             } else {
                 Log.e("ERROR: ", "Cannot create chat room");
             }
+
             //them vao firebase
             newMessage = new ChatMessageClass(username, txtMessage.getText().toString(), getStringDateTime());
             db_chatRoom.push().setValue(newMessage);
@@ -121,9 +182,13 @@ public class ChattingActivity extends AppCompatActivity {
             chatroomlog.setDatetime(getStringDateTimeChatRoom());
             db_room.setValue(chatroomlog);
             //them vao GUI
-//            if (!arrayList.isEmpty()) arrayList.clear();
             arrayList.add(newMessage);
-            adapterConversation.addItem(arrayList);
+            if(adapterConversation == null) {
+                chatBoxView(0);
+            } else {
+                adapterConversation.addItem(arrayList);
+            }
+
             recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
         }
         txtMessage.setText("");
@@ -145,6 +210,7 @@ public class ChattingActivity extends AppCompatActivity {
         db_listMessage = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatlogs/" + chatRoom);
         listMessage = db_listMessage;
         db_chatlogs = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatlogs/");
+
     }
 
 
@@ -218,65 +284,7 @@ public class ChattingActivity extends AppCompatActivity {
     }
 
     private void addEvents() {
-        //khi nhan duoc tin nhan tu server
-        coreListenerStub = new CoreListenerStub() {
-            @Override
-            public void onMessageReceived(Core lc, ChatRoom room, ChatMessage message) {
-                if (room != null) {
-                    if (message.hasTextContent()) {
-                        String messageTime = new SimpleDateFormat("dd-MM-yyyy | HH:mm").format(new Date(message.getTime() * 1000L));
-                        String messageContent = message.getTextContent();
-                        String messageFrom = message.getFromAddress().getUsername();
-                        ChatMessageClass chatMessageClass = new ChatMessageClass(messageFrom, messageContent, messageTime);
-                        //display received message when at ChattingActivity with the sender
-                        if (message.getCustomHeader("group") == null && !message.getFromAddress().getUsername().equals(username)) {
-                            if (message.getFromAddress().getUsername().equals(contact_user)) {
 
-                                List<ChatMessageClass> chatMessages = new ArrayList<>();
-                                if (!chatMessages.isEmpty()) chatMessages.clear();
-                                chatMessages.add(chatMessageClass);
-                                //add to GUI
-                                adapterConversation.addItem(chatMessages);
-                                recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
-                            }
-                        }
-                    }
-                }
-            }
-        };
-        //khi nhan tin thanh cong tren server
-//        messageListenerStub = new ChatMessageListenerStub() {
-//            @Override
-//            public void onMsgStateChanged(ChatMessage msg, ChatMessage.State state) {
-//                if (state.equals(ChatMessage.State.Delivered)
-//                        || state.equals(ChatMessage.State.DeliveredToUser)
-//                        || state.equals(ChatMessage.State.Displayed)) {
-//
-//                    //them vao firebase
-//                    newMessage = new ChatMessageClass(username, txtMessage.getText().toString(), getStringDateTime());
-//                    db_chatRoom.push().setValue(newMessage);
-//                    chatroomlog.setContext(newMessage.getContext());
-//                    chatroomlog.setDatetime(getStringDateTimeChatRoom());
-//                    db_room.setValue(chatroomlog);
-//
-//                    //them vao GUI
-//                    List<ChatMessageClass> chatMessages = new ArrayList<>();
-//                    if (!chatMessages.isEmpty()) chatMessages.clear();
-//                    chatMessages.add(newMessage);
-//                    adapterConversation.addItem(chatMessages);
-//                    recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
-//
-//
-//                    txtMessage.getText().clear();
-//                    msg.removeListener(messageListenerStub);
-////                    Toast.makeText(ChattingActivity.this, "Message delivered", Toast.LENGTH_SHORT).show();
-//                }
-//                if (state.equals(ChatMessage.State.NotDelivered)) {
-//                    msg.removeListener(messageListenerStub);
-////                    Toast.makeText(ChattingActivity.this, "Message not delivered", Toast.LENGTH_LONG).show();
-//                }
-//            }
-//        };
     }
 
 
