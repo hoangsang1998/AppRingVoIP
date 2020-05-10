@@ -87,15 +87,6 @@ public class ChattingActivity extends AppCompatActivity {
                         if (message.getCustomHeader("group") == null && !message.getFromAddress().getUsername().equals(username)) {
                             if (message.getFromAddress().getUsername().equals(contact_user)) {
 
-//                                List<ChatMessageClass> chatMessages = new ArrayList<>();
-//                                if (!chatMessages.isEmpty()) chatMessages.clear();
-//                                chatMessages.add(chatMessageClass);
-                                //add to GUI
-//                                adapterConversation.addItem(chatMessages);
-//                                recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
-
-                                //them vao firebase neu la app khac gui tin nhan vao
-//                                newMessage = new ChatMessageClass(username, txtMessage.getText().toString(), getStringDateTime());
                                 if(message.getCustomHeader("fromApp") == null) {
                                     //luu neu k co getCustomHeader
                                     db_chatRoom.push().setValue(chatMessageClass);
