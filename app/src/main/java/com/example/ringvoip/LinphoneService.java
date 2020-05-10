@@ -1,5 +1,9 @@
 package com.example.ringvoip;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -10,9 +14,19 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+
+import com.example.ringvoip.Chat.ChatMessageClass;
+import com.example.ringvoip.Chat.ChattingActivity;
+import com.example.ringvoip.Home.ChatRoomClass;
+import com.example.ringvoip.Home.HomeActivity;
+import com.google.firebase.database.DatabaseReference;
 
 import org.linphone.core.Call;
 import org.linphone.core.CallParams;
+import org.linphone.core.ChatMessage;
+import org.linphone.core.ChatRoom;
 import org.linphone.core.Core;
 import org.linphone.core.CoreListenerStub;
 import org.linphone.core.Factory;
@@ -25,16 +39,25 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class LinphoneService extends Service {
     private static final String START_LINPHONE_LOGS = " ==== Device information dump ====";
+    private static final String CHANNEL_ID = "com.example.ringvoip.ID";
     // Keep a static reference to the Service so we can access it from anywhere in the app
     private static LinphoneService sInstance;
 
     private Handler mHandler;
     public static Timer mTimer;
+
+    //----------------------------
+    CoreListenerStub coreListenerStubService;
+    DatabaseReference db_chatRoom = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatlogs/" + chatRoom);;
+    ChatRoomClass chatroomlog;
+    //----------------------------
 
     private Core mCore;
     public static CoreListenerStub mCoreListener;
@@ -120,6 +143,65 @@ public class LinphoneService extends Service {
         mCore.addListener(mCoreListener);
         // Core is ready to be configured
         configureCore();
+        listenerFromServer();
+    }
+
+    private void listenerFromServer() {
+        coreListenerStubService = new CoreListenerStub() {
+            @Override
+            public void onMessageReceived(Core lc, ChatRoom room, ChatMessage message) {
+                String messageTime = new SimpleDateFormat("dd-MM-yyyy | HH:mm").format(new Date(message.getTime() * 1000L));
+                String messageContent = message.getTextContent();
+                String messageFrom = message.getFromAddress().getUsername();
+                ChatMessageClass chatMessageClass = new ChatMessageClass(messageFrom, messageContent, messageTime);
+                if(message.getCustomHeader("fromApp") == null) {
+                    //luu neu k co getCustomHeader
+                    db_chatRoom.push().setValue(chatMessageClass);
+                    chatroomlog.setUsername1(contact_user);
+                    chatroomlog.setUsername2(username);
+                    chatroomlog.setContext(chatMessageClass.getContext());
+                    chatroomlog.setDatetime(getStringDateTimeChatRoom());
+                    db_room.setValue(chatroomlog);
+                }
+                noti(room.getPeerAddress().getUsername(), message.getTextContent());
+            }
+        };
+        mCore.addListener(coreListenerStubService);
+    }
+
+    private void noti(String friendName, String message) {
+        Intent intent = new Intent(this, HomeActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
+                .setSmallIcon(R.drawable.notification_icon)
+                .setContentTitle(friendName)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setDefaults(Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+// notificationId is a unique int for each notification that you must define
+        int notificationId =  100;
+        notificationManager.notify(notificationId, mBuilder.build());
+    }
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
     @Override
@@ -162,6 +244,7 @@ public class LinphoneService extends Service {
     @Override
     public void onDestroy() {
         mCore.removeListener(mCoreListener);
+        mCore.removeListener(coreListenerStubService);
         mCore.setDefaultProxyConfig(null);
         mTimer.cancel();
         mCore.stop();
