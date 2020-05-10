@@ -1,6 +1,7 @@
 package com.example.ringvoip.Contact;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,8 +23,10 @@ import com.example.ringvoip.Login.UserClass;
 import com.example.ringvoip.Profile.ProfileFriendActivity;
 import com.example.ringvoip.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
@@ -44,6 +47,8 @@ public class ContactActivity extends AppCompatActivity implements AdapterContact
     String username;
     Core core;
     String domain;
+    ChildEventListener childEventListener, childEventListenerStatus;
+    Query ListenerContact, ListenerContactStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +58,88 @@ public class ContactActivity extends AppCompatActivity implements AdapterContact
         addControls();
         addEvents();
         loadContacts();
+        //cat nhat contacts
+        final DatabaseReference db_ListenerContact = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/contacts/" + username);
+        ListenerContact = db_ListenerContact;
+        ListenerContact.addChildEventListener(childEventListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                loadContacts();
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        //lang nghe de cap nhat trang thai online, ofline
+        final DatabaseReference db_ListenerContactStatus = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/users");
+        ListenerContactStatus = db_ListenerContactStatus;
+        ListenerContactStatus.addChildEventListener(childEventListenerStatus = new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                loadContacts();
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ListenerContact.removeEventListener(childEventListener);
+        ListenerContactStatus.removeEventListener(childEventListenerStatus);
     }
 
     private void addVariables() {
         database = FirebaseDatabase.getInstance();
-        username = "sang";
+        String temp = LinphoneService.getCore().getIdentity().split("@")[0];
+        username= temp.split(":")[1];
         core = LinphoneService.getCore();
         domain = core.getIdentity().split("@")[1];
     }

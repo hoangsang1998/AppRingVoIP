@@ -33,6 +33,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import org.linphone.core.ChatMessage;
+import org.linphone.core.ChatRoom;
+import org.linphone.core.Core;
 import org.linphone.core.CoreListenerStub;
 import org.linphone.core.ProxyConfig;
 import org.linphone.core.RegistrationState;
@@ -53,6 +56,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
 
     FirebaseDatabase database;
     DatabaseReference db_chatRoom;
+    CoreListenerStub coreListenerStub;
 
     private CoreListenerStub mCoreListener;
 
@@ -64,7 +68,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
         addControls();
         addEvents();
         addVariables();
-        loadHome();
+
         Intent intent = getIntent();
 
 //        username = intent.getStringExtra("username");
@@ -74,6 +78,48 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
         username= temp.split(":")[1];
         txtUserName.setText(HelloUser);
         sipuri = intent.getStringExtra("sipuri");
+        //tao lang nghe khi nhan tin nhan tu server
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadHome();
+        // The best way to use Core listeners in Activities is to add them in onResume
+        // and to remove them in onPause
+        LinphoneService.getCore().addListener(mCoreListener);
+
+        // Manually update the LED registration state, in case it has been registered before
+        // we add a chance to register the above listener
+        ProxyConfig proxyConfig = LinphoneService.getCore().getDefaultProxyConfig();
+        if (proxyConfig != null) {
+            updateLed(proxyConfig.getState());
+        } else {
+//             No account configured, we display the configuration activity
+            startActivity(new Intent(this, LoginActivity.class));
+        }
+        //---------------------------------------
+        //nhan tin tu server luu, cap nhat lai home
+        coreListenerStub = new CoreListenerStub() {
+            @Override
+            public void onMessageReceived(Core lc, ChatRoom room, ChatMessage message) {
+
+                loadHome();
+            }
+        };
+        LinphoneService.getCore().addListener(coreListenerStub);
+
+
+    }
+
+    @Override
+    protected void onPause() {
+        // Like I said above, remove unused Core listeners in onPause
+        LinphoneService.getCore().removeListener(mCoreListener);
+        //----------------------------------
+        LinphoneService.getCore().removeListener(coreListenerStub);
+        super.onPause();
     }
 
     private void loadHome() {
@@ -117,32 +163,9 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
 //        checkAndRequestCallPermissions();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
 
-        // The best way to use Core listeners in Activities is to add them in onResume
-        // and to remove them in onPause
-        LinphoneService.getCore().addListener(mCoreListener);
 
-        // Manually update the LED registration state, in case it has been registered before
-        // we add a chance to register the above listener
-        ProxyConfig proxyConfig = LinphoneService.getCore().getDefaultProxyConfig();
-        if (proxyConfig != null) {
-            updateLed(proxyConfig.getState());
-        } else {
-//             No account configured, we display the configuration activity
-            startActivity(new Intent(this, LoginActivity.class));
-        }
-    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        // Like I said above, remove unused Core listeners in onPause
-        LinphoneService.getCore().removeListener(mCoreListener);
-    }
 
     @Override
     protected void onDestroy() {
