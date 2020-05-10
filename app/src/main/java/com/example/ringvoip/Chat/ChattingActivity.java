@@ -56,7 +56,6 @@ public class ChattingActivity extends AppCompatActivity {
     ChatRoomClass chatroomlog;
     Query listMessage;
     CoreListenerStub coreListenerStub;
-    ChatMessageListenerStub messageListenerStub;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +85,7 @@ public class ChattingActivity extends AppCompatActivity {
         Intent intentFriendProfile = new Intent(this, ProfileFriendActivity.class);
         intentFriendProfile.putExtra("userName", intent.getStringExtra("userName"));
         intentFriendProfile.putExtra("userFriend", intent.getStringExtra("userFriend"));
-        intentFriendProfile.putExtra("sipUri", intent.getStringExtra("userFriend") + "@hoangsang1998.com.vn");
+        intentFriendProfile.putExtra("sipUri", intent.getStringExtra("userFriend") + "@" + LinphoneService.getCore().getIdentity().split("@")[1]);
         String isChattingActivity = "true";
         intentFriendProfile.putExtra("isChattingActivity", isChattingActivity);
         startActivity(intentFriendProfile);
@@ -132,7 +131,10 @@ public class ChattingActivity extends AppCompatActivity {
 
     private void addVariables() {
         Intent intent = getIntent();
-        username = intent.getStringExtra("userName");
+//        username = intent.getStringExtra("userName");
+        String temp = LinphoneService.getCore().getIdentity().split("@")[0];
+        String HelloUser = temp.split(":")[1];
+        username = HelloUser;
         contact_user = intent.getStringExtra("userFriend");
         database = FirebaseDatabase.getInstance();
         chatRoom = getChatRoomByTwoUsername(username, contact_user);

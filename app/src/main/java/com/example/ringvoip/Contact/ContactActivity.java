@@ -14,11 +14,21 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.example.ringvoip.Home.HomeActivity;
+import com.example.ringvoip.LinphoneService;
+import com.example.ringvoip.Login.UserClass;
 import com.example.ringvoip.Profile.ProfileFriendActivity;
 import com.example.ringvoip.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import org.linphone.core.Core;
 
 import java.util.ArrayList;
 
@@ -30,34 +40,91 @@ public class ContactActivity extends AppCompatActivity implements AdapterContact
     ArrayList<ContactClass> contactList = new ArrayList<>();
     private Dialog dialog;
     String isChattingActivity = "false";
+    FirebaseDatabase database;
+    String username;
+    Core core;
+    String domain;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact);
+        addVariables();
         addControls();
         addEvents();
+        loadContacts();
+    }
+
+    private void addVariables() {
+        database = FirebaseDatabase.getInstance();
+        username = "sang";
+        core = LinphoneService.getCore();
+        domain = core.getIdentity().split("@")[1];
+    }
+
+    private void loadContacts() {
+        final Query db_root = database.getReference();
+        db_root.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //get data when after update message
+                if (dataSnapshot.exists()) {// get data when first open
+                    if (dataSnapshot.child("contacts").exists() && dataSnapshot.child("users").exists()) {
+                        if (!contactList.isEmpty()) contactList.clear();
+                        for (DataSnapshot contact_dtss : dataSnapshot.child("contacts").child(username).getChildren()) {
+                            ContactClass contact = contact_dtss.getValue(ContactClass.class);
+                            assert contact != null;
+                            System.out.println("datasnapshot users: " + contact.getName());
+                            UserClass check_user = dataSnapshot.child("users").child(contact.getName()).getValue(UserClass.class);
+                            String status;
+                            // avoid error when getting value from a user isn't in Firebase database
+                            try {
+                                if (check_user.getStatus() == null) {
+                                    status = "Offline";
+                                } else {
+                                    status = check_user.getStatus();
+                                }
+                            } catch (Exception e) {
+                                status = "Offline";
+                            }
+                            contact.setStatus(status);
+                            contactList.add(contact);
+                        }
+                        initView();
+                        db_root.removeEventListener(this);
+                    } else {
+                        return;
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Lỗi load database", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void addEvents() {
         navFooter.setOnNavigationItemSelectedListener(navigationItemSelectedListener);
-        ContactClass contact = new ContactClass("sang", "sip");
-        ContactClass contact2 = new ContactClass("sang2", "sip2");
-        ContactClass contact3 = new ContactClass("sang3", "sip3");
-        ContactClass contact4 = new ContactClass("sang4", "sip4");
-        ContactClass contact5 = new ContactClass("sang5", "sip5");
-        String status = "Offline";
-        contact.setStatus(status);
-        contact2.setStatus("Online");
-        contact3.setStatus(status);
-        contact4.setStatus(status);
-        contact5.setStatus(status);
-        contactList.add(contact);
-        contactList.add(contact2);
-        contactList.add(contact3);
-        contactList.add(contact4);
-        contactList.add(contact5);
-        initView();
+//        ContactClass contact = new ContactClass("sang", "sip");
+//        ContactClass contact2 = new ContactClass("sang2", "sip2");
+//        ContactClass contact3 = new ContactClass("sang3", "sip3");
+//        ContactClass contact4 = new ContactClass("sang4", "sip4");
+//        ContactClass contact5 = new ContactClass("sang5", "sip5");
+//        String status = "Offline";
+//        contact.setStatus(status);
+//        contact2.setStatus("Online");
+//        contact3.setStatus(status);
+//        contact4.setStatus(status);
+//        contact5.setStatus(status);
+//        contactList.add(contact);
+//        contactList.add(contact2);
+//        contactList.add(contact3);
+//        contactList.add(contact4);
+//        contactList.add(contact5);
+//        initView();
     }
 
     private void addControls() {
@@ -133,9 +200,8 @@ public class ContactActivity extends AppCompatActivity implements AdapterContact
     @Override
     public void onContactClick(View view, int position) {
         Intent intentProfileFriend = new Intent(ContactActivity.this, ProfileFriendActivity.class);
-//        intentProfileFriend.putExtra("isChattingActivity", isChattingActivity);
         intentProfileFriend.putExtra("userFriend", contactList.get(position).getName());
-        intentProfileFriend.putExtra("sipUri", contactList.get(position).getName() + "@hoangsang1998.com.vn");
+        intentProfileFriend.putExtra("sipUri", contactList.get(position).getName() + "@" + domain);
         intentProfileFriend.putExtra("contact_username", contactList.get(position).getName());
         intentProfileFriend.putExtra("isChattingActivity", isChattingActivity);
         startActivity(intentProfileFriend);

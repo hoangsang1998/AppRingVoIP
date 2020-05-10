@@ -1,5 +1,6 @@
 package com.example.ringvoip.Login;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
@@ -14,6 +15,11 @@ import android.widget.Toast;
 import com.example.ringvoip.Home.HomeActivity;
 import com.example.ringvoip.LinphoneService;
 import com.example.ringvoip.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.linphone.core.AccountCreator;
 import org.linphone.core.Core;
@@ -29,6 +35,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private AccountCreator mAccountCreator;
     private CoreListenerStub mCoreListener;
+    FirebaseDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +52,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void addVariables() {
         mAccountCreator = LinphoneService.getCore().createAccountCreator(null);
+        database = FirebaseDatabase.getInstance();
     }
 
     private void addEvent() {
@@ -61,6 +69,29 @@ public class LoginActivity extends AppCompatActivity {
             public void onRegistrationStateChanged(Core core, ProxyConfig cfg, RegistrationState state, String message) {
                 if (state == RegistrationState.Ok) {
                     startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                    //luu nguoi dung vao firbase
+                    try {
+                        final DatabaseReference db_theUserLogin = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/users/" + txtUserName.getText().toString());
+                        db_theUserLogin.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (!dataSnapshot.exists()) {
+                                    UserClass userLogin = new UserClass(txtUserName.getText().toString(), LinphoneService.getCore().getIdentity(), "Online");
+                                    db_theUserLogin.setValue(userLogin);
+                                } else {
+                                    db_theUserLogin.child("status").setValue("Online");
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+
+                        });
+                    } catch (Exception ex) {
+                        System.out.println(ex.toString());
+                    }
                     finish();
                 } else if (state == RegistrationState.Failed) {
                     Toast.makeText(LoginActivity.this, "Failure: " + message, Toast.LENGTH_LONG).show();

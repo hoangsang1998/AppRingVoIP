@@ -69,7 +69,9 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
 
 //        username = intent.getStringExtra("username");
         username="sang";
-        txtUserName.setText(LinphoneService.getCore().getIdentity());
+        String temp = LinphoneService.getCore().getIdentity().split("@")[0];
+        String HelloUser = "Xin chào: " + temp.split(":")[1];
+        txtUserName.setText(HelloUser);
         sipuri = intent.getStringExtra("sipuri");
     }
 
