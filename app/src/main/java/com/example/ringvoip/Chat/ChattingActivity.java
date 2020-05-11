@@ -89,12 +89,15 @@ public class ChattingActivity extends AppCompatActivity {
 
                                 if(message.getCustomHeader("fromApp") == null) {
                                     //luu neu k co getCustomHeader
-                                    db_chatRoom.push().setValue(chatMessageClass);
-                                    chatroomlog.setUsername1(contact_user);
-                                    chatroomlog.setUsername2(username);
-                                    chatroomlog.setContext(chatMessageClass.getContext());
-                                    chatroomlog.setDatetime(getStringDateTimeChatRoom());
-                                    db_room.setValue(chatroomlog);
+                                    if(LinphoneService.flagService) {
+                                        db_chatRoom.push().setValue(chatMessageClass);
+                                        chatroomlog.setUsername1(contact_user);
+                                        chatroomlog.setUsername2(username);
+                                        chatroomlog.setContext(chatMessageClass.getContext());
+                                        chatroomlog.setDatetime(getStringDateTimeChatRoom());
+                                        db_room.setValue(chatroomlog);
+                                    }
+
                                 }
 
                                 //them vao GUI

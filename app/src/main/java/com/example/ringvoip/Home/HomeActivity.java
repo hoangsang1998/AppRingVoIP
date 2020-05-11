@@ -78,8 +78,12 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
         username= temp.split(":")[1];
         txtUserName.setText(HelloUser);
         sipuri = intent.getStringExtra("sipuri");
-        //tao lang nghe khi nhan tin nhan tu server
-
+        //------------------
+        recChat = findViewById(R.id.recChat);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        recChat.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, layoutManager.getOrientation());
+        recChat.addItemDecoration(dividerItemDecoration);
     }
 
     @Override
@@ -104,8 +108,9 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
         coreListenerStub = new CoreListenerStub() {
             @Override
             public void onMessageReceived(Core lc, ChatRoom room, ChatMessage message) {
-
-                loadHome();
+                if (!LinphoneService.flagService){
+                    loadHome();
+                }
             }
         };
         LinphoneService.getCore().addListener(coreListenerStub);
@@ -291,14 +296,11 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
     }
 
     private void initView() {
-        recChat = findViewById(R.id.recChat);
+
         recChat.setHasFixedSize(true);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        recChat.setLayoutManager(layoutManager);
 
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, layoutManager.getOrientation());
-        recChat.addItemDecoration(dividerItemDecoration);
+
 
         //sort by datetime
         Collections.sort(chatRoomList, new Comparator<ChatRoomClass>() {

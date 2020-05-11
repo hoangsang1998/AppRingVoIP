@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -22,6 +23,7 @@ import com.example.ringvoip.Chat.ChattingActivity;
 import com.example.ringvoip.Home.ChatRoomClass;
 import com.example.ringvoip.Home.HomeActivity;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.linphone.core.Call;
 import org.linphone.core.CallParams;
@@ -40,7 +42,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -55,8 +59,14 @@ public class LinphoneService extends Service {
 
     //----------------------------
     CoreListenerStub coreListenerStubService;
-    DatabaseReference db_chatRoom = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatlogs/" + chatRoom);;
-    ChatRoomClass chatroomlog;
+    FirebaseDatabase database;
+
+    DatabaseReference db_chatRoom, db_room;
+    ChatRoomClass chatroomlog = new ChatRoomClass();
+    String chatRoom;
+    String messageFrom, username;
+    ChatMessageClass chatMessageClass;
+    public static boolean flagService = false;
     //----------------------------
 
     private Core mCore;
@@ -143,30 +153,88 @@ public class LinphoneService extends Service {
         mCore.addListener(mCoreListener);
         // Core is ready to be configured
         configureCore();
+        addVariables();
         listenerFromServer();
+
+    }
+
+    private void addVariables() {
+        database = FirebaseDatabase.getInstance();
+
     }
 
     private void listenerFromServer() {
         coreListenerStubService = new CoreListenerStub() {
             @Override
             public void onMessageReceived(Core lc, ChatRoom room, ChatMessage message) {
+
                 String messageTime = new SimpleDateFormat("dd-MM-yyyy | HH:mm").format(new Date(message.getTime() * 1000L));
                 String messageContent = message.getTextContent();
-                String messageFrom = message.getFromAddress().getUsername();
-                ChatMessageClass chatMessageClass = new ChatMessageClass(messageFrom, messageContent, messageTime);
+                messageFrom = message.getFromAddress().getUsername();
+                chatMessageClass = new ChatMessageClass(messageFrom, messageContent, messageTime);
+                //-------------------------
+                String temp = LinphoneService.getCore().getIdentity().split("@")[0];
+                username = temp.split(":")[1];
+                chatRoom = getChatRoomByTwoUsername(username, messageFrom);
+                db_chatRoom = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatlogs/" + chatRoom);
+                db_room = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatrooms/" + chatRoom);
+                //-------------------------
                 if(message.getCustomHeader("fromApp") == null) {
                     //luu neu k co getCustomHeader
-                    db_chatRoom.push().setValue(chatMessageClass);
-                    chatroomlog.setUsername1(contact_user);
-                    chatroomlog.setUsername2(username);
-                    chatroomlog.setContext(chatMessageClass.getContext());
-                    chatroomlog.setDatetime(getStringDateTimeChatRoom());
-                    db_room.setValue(chatroomlog);
+                    flagService = true;
+                    Thread myTask = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+
+                            chatroomlog.setUsername1(messageFrom);
+                            chatroomlog.setUsername2(username);
+                            chatroomlog.setContext(chatMessageClass.getContext());
+                            chatroomlog.setDatetime(getStringDateTimeChatRoom());
+                            db_chatRoom.push().setValue(chatMessageClass);
+                            db_room.setValue(chatroomlog);
+                            flagService = false;
+                        }
+                    });
+                    myTask.start();
+
                 }
                 noti(room.getPeerAddress().getUsername(), message.getTextContent());
             }
         };
         mCore.addListener(coreListenerStubService);
+    }
+
+
+    public static String getStringDateTimeChatRoom() {
+        String result = "";
+        Date currentTime = Calendar.getInstance().getTime();
+        SimpleDateFormat formatterNew = new SimpleDateFormat("yyyy-MM-dd | HH:mm:ss", Locale.getDefault());
+        result = formatterNew.format(currentTime);
+        return result;
+    }
+
+    public static String getChatRoomByTwoUsername(String username1, String username2) {
+        String[] myArray = {username1, username2};
+        StringBuilder result = new StringBuilder();
+        int size = myArray.length;
+        for (int i = 0; i < size - 1; i++) {
+            for (int j = i + 1; j < myArray.length; j++) {
+                if (myArray[i].compareTo(myArray[j]) > 0) {
+                    String temp = myArray[i];
+                    myArray[i] = myArray[j];
+                    myArray[j] = temp;
+                }
+            }
+        }
+        for (int i = 0; i < size; i++) {
+            if (i == 0) {
+                result.append(myArray[i]);
+            } else {
+                result.append("&").append(myArray[i]);
+            }
+        }
+        return result.toString();
     }
 
     private void noti(String friendName, String message) {
