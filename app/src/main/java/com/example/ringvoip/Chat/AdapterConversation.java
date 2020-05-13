@@ -69,7 +69,17 @@ public class AdapterConversation extends RecyclerView.Adapter<RecyclerView.ViewH
                 return DECLINEDYOU;
             }
 
-        } else if (chatMessages.get(position).getType().equals("Missed")) {
+        }
+//        else if (chatMessages.get(position).getType().equals("Aborted")) {
+//
+//            if (chatMessages.get(position).getUsername().equals(username)) {
+//                return DECLINEDME;
+//            } else if (!chatMessages.get(position).getUsername().equals(username)) {
+//                return DECLINEDYOU;
+//            }
+//
+//        }
+        else if (chatMessages.get(position).getType().equals("Missed")) {
 
             if (chatMessages.get(position).getUsername().equals(username)) {
                 return MISSEDCALLME;
@@ -207,7 +217,7 @@ public class AdapterConversation extends RecyclerView.Adapter<RecyclerView.ViewH
     @SuppressLint("SetTextI18n")
     private void configureViewHolder7(HolderMissedCallMe vh_me, int position) {
         vh_me.getTime().setText(chatMessages.get(position).getDatetime());
-        vh_me.getMissedCall().setText("Call declined.");
+        vh_me.getMissedCall().setText("Aborted.");
     }
 
     @SuppressLint("SetTextI18n")

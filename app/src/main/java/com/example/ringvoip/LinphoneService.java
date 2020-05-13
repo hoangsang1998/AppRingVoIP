@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.example.ringvoip.Call.CallOutgoingActivity;
 import com.example.ringvoip.Chat.ChatMessageClass;
 import com.example.ringvoip.Chat.ChattingActivity;
 import com.example.ringvoip.Home.ChatRoomClass;
@@ -119,7 +120,7 @@ public class LinphoneService extends Service {
         mCoreListener = new CoreListenerStub() {
             @Override
             public void onCallStateChanged(Core core, Call call, Call.State state, String message) {
-                Toast.makeText(LinphoneService.this, message, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(LinphoneService.this, message, Toast.LENGTH_SHORT).show();
 
                 if (state == Call.State.IncomingReceived) {
                     Toast.makeText(LinphoneService.this, "Incoming call received, answering it automatically", Toast.LENGTH_LONG).show();
@@ -127,7 +128,13 @@ public class LinphoneService extends Service {
                     CallParams params = getCore().createCallParams(call);
                     params.enableVideo(true);
                     call.acceptWithParams(params);
-                } else if (state == Call.State.Connected) {
+                } else if (state == Call.State.OutgoingInit) {
+                    // This stats means the call has been established, let's start the call activity
+                    Intent intent = new Intent().setClass(LinphoneService.this, CallOutgoingActivity.class);
+                    // As it is the Service that is starting the activity, we have to give this flag
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                }else if (state == Call.State.Connected) {
                     // This stats means the call has been established, let's start the call activity
 //                    Intent intent = new Intent(LinphoneService.this, CallActivity.class);
                     // As it is the Service that is starting the activity, we have to give this flag

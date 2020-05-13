@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_above="@id/chrono_timer"
-        android:text="RingRing"
+        android:text="Connect..."
         android:textColor="#fff"
         android:textSize="33sp"/>
 
@@ -91,6 +91,7 @@
             android:id="@+id/btn_call_terminate"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:onClick="EvenBtnEndCall"
             android:layout_marginTop="20dp"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/btn_speaker"

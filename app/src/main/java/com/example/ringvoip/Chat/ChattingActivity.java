@@ -28,6 +28,8 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import org.linphone.core.Address;
+import org.linphone.core.Call;
+import org.linphone.core.CallParams;
 import org.linphone.core.ChatMessage;
 import org.linphone.core.ChatMessageListenerStub;
 import org.linphone.core.ChatRoom;
@@ -52,7 +54,7 @@ public class ChattingActivity extends AppCompatActivity {
 
     FirebaseDatabase database;
     DatabaseReference db_chatRoom, db_room, db_listMessage, db_chatlogs;
-    ChatMessageClass newMessage;
+    ChatMessageClass newMessage, newMessage1;
     ChatRoomClass chatroomlog;
     Query listMessage;
     CoreListenerStub coreListenerStub;
@@ -67,12 +69,7 @@ public class ChattingActivity extends AppCompatActivity {
         loadConversations();
 
         txtFriendName.setText(contact_user);
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
+        //---------------------------
         //nhan tin tu server
         coreListenerStub = new CoreListenerStub() {
             @Override
@@ -114,24 +111,73 @@ public class ChattingActivity extends AppCompatActivity {
                     }
                 }
             }
+
+            @Override
+            public void onCallStateChanged(Core core, Call call, Call.State state, String message) {
+                if (state == Call.State.Released) {
+                    newMessage1 = new ChatMessageClass(call.getCallLog().getFromAddress().getUsername()
+                            , String.valueOf(call.getDuration()), getStringDateTime(), call.getCallLog().getStatus().toString());
+                    arrayList.add(newMessage1);
+                    if(adapterConversation == null) {
+                        chatBoxView(0);
+                    } else {
+                        adapterConversation.addItem(arrayList);
+                    }
+
+                    recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
+
+                }
+            }
         };
         LinphoneService.getCore().addListener(coreListenerStub);
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
     protected void onPause() {
-        LinphoneService.getCore().removeListener(coreListenerStub);
+
         super.onPause();
     }
 
-    public void btnCallVideoEvent(View view) {
-        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
-        startActivity(intentCallVideo);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LinphoneService.getCore().removeListener(coreListenerStub);
+    }
+
+    public void btnCallVideoEvent(View view)
+    {
+        Core core = LinphoneService.getCore();
+        Address addressToCall = core.interpretUrl(txtFriendName.getText().toString());
+        CallParams params = core.createCallParams(null);
+
+//        Switch videoEnabled = findViewById(R.id.call_with_video);
+        params.enableVideo(true);
+
+        if (addressToCall != null) {
+            core.inviteAddressWithParams(addressToCall, params);
+        }
+//        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
+//        startActivity(intentCallVideo);
     }
 
     public void btnCallEvent(View view) {
-        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
-        startActivity(intentCallVideo);
+        Core core = LinphoneService.getCore();
+        Address addressToCall = core.interpretUrl(txtFriendName.getText().toString());
+        CallParams params = core.createCallParams(null);
+
+        params.enableVideo(false);
+
+        if (addressToCall != null) {
+            core.inviteAddressWithParams(addressToCall, params);
+        }
+//        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
+//        startActivity(intentCallVideo);
     }
 
     public void imgFriendEvent(View view) {
@@ -234,40 +280,6 @@ public class ChattingActivity extends AppCompatActivity {
             }
         });
 
-//        listMessage.addChildEventListener(childEventListener = new ChildEventListener() {
-//            //when chat in room
-//            @Override
-//            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-//                if (dataSnapshot.exists()) {
-//                    arrayList.add(dataSnapshot.getValue(ChatMessageClass.class));
-//
-////                    adapterConversation.addItem(arrayList);
-////                    recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
-////                    chatBoxView(0);
-//
-//                }
-//            }
-//
-//            @Override
-//            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-//
-//            }
-//
-//            @Override
-//            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-//
-//            }
-//
-//            @Override
-//            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });
     }
 
     private void addControls() {
