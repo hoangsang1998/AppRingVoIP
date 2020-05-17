@@ -149,7 +149,7 @@ public class CallOutgoingActivity extends AppCompatActivity {
 
     private void updateSpeakerBtnState() {
         if (mAudioManager.isSpeakerphoneOn()) {
-            btn_speaker.setImageResource(R.drawable.btn_speaker_enable);
+            btn_speaker.setImageResource(R.drawable.ic_volume_off_black_24dp);
         } else {
             btn_speaker.setImageResource(R.drawable.btn_speaker_disable);
         }
