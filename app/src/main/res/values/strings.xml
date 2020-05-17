@@ -4,4 +4,10 @@
     <string name="type_a_message">Tin nhắn</string>
     <string name="channel_name">Noti</string>
     <string name="channel_description">this is noti</string>
+
+    <string name="error_unknown">Unknown error</string>
+    <string name="error_call_declined">Call declined</string>
+    <string name="error_user_busy">User busy</string>
+    <string name="error_user_not_found">User not found</string>
+    <string name="error_incompatible_media">Incompatible media parameters</string>
 </resources>

@@ -119,31 +119,31 @@ public class ChattingActivity extends AppCompatActivity {
                 }
             }
 
-            @Override
-            public void onCallStateChanged(Core core, Call call, Call.State state, String message) {
-                // Get elapsed time in milliseconds
-                elapsedTimeMillis = System.currentTimeMillis()-start;
-
-                if (state == Call.State.Released && elapsedTimeMillis >= 2000) {
-                    Call.Status callstatus = call.getCallLog().getStatus();
-                    if(callstatus.toString().equals("Aborted") || callstatus.toString().equals("Success")) {//tự mình tắt máy
-                        newMessage1 = new ChatMessageClass(call.getCallLog().getFromAddress().getUsername(), getDuration(call), getStringDateTime(), call.getCallLog().getStatus().toString());
-                    } else {
-                        newMessage1 = new ChatMessageClass(call.getCallLog().getToAddress().getUsername(), getDuration(call), getStringDateTime(), call.getCallLog().getStatus().toString());
-                    }
-
-
-                    arrayList.add(newMessage1);
-                    if(adapterConversation == null) {
-                        chatBoxView(0);
-                    } else {
-                        adapterConversation.addItem(arrayList);
-                    }
-
-                    recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
-
-                }
-            }
+//            @Override
+//            public void onCallStateChanged(Core core, Call call, Call.State state, String message) {
+//                // Get elapsed time in milliseconds
+//                elapsedTimeMillis = System.currentTimeMillis()-start;
+//
+//                if (state == Call.State.Released && elapsedTimeMillis >= 2000) {
+//                    Call.Status callstatus = call.getCallLog().getStatus();
+//                    if(callstatus.toString().equals("Aborted") || callstatus.toString().equals("Success")) {//tự mình tắt máy
+//                        newMessage1 = new ChatMessageClass(call.getCallLog().getFromAddress().getUsername(), getDuration(call), getStringDateTime(), call.getCallLog().getStatus().toString());
+//                    } else {
+//                        newMessage1 = new ChatMessageClass(call.getCallLog().getToAddress().getUsername(), getDuration(call), getStringDateTime(), "Declined");
+//                    }
+//
+//
+//                    arrayList.add(newMessage1);
+//                    if(adapterConversation == null) {
+//                        chatBoxView(0);
+//                    } else {
+//                        adapterConversation.addItem(arrayList);
+//                    }
+//
+//                    recyclerView.smoothScrollToPosition(recyclerView.getAdapter().getItemCount() - 1);
+//
+//                }
+//            }
         };
         LinphoneService.getCore().addListener(coreListenerStub);
     }
