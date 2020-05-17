@@ -37,6 +37,7 @@ public class AddFriendActivity extends AppCompatActivity {
     }
 
     public void btnAddEvent(View view) {
+        etxt_add_username.setText(etxt_add_username.getText().toString().trim());
         etxt_add_username_Stringtype = etxt_add_username.getText().toString();
         if (etxt_add_username_Stringtype.trim().equals(username)) {
             Toast.makeText(getApplicationContext(), "Cannot add friend to yourself", Toast.LENGTH_SHORT).show();

@@ -40,6 +40,8 @@ public class CallOutgoingActivity extends AppCompatActivity {
     ChatRoomClass chatRoomClass;
     private AudioManager mAudioManager;
     ImageButton btn_speaker;
+    ImageButton btn_mute;
+    Core core = LinphoneService.getCore();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,8 +53,19 @@ public class CallOutgoingActivity extends AppCompatActivity {
         }catch (Exception ex){
 
         }
+        //--------------su kien mic------------------
+        btn_mute = (ImageButton) findViewById(R.id.btn_mute);
+        core.enableMic(true);
+        btn_mute.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleMic();
+            }
+        });
+        //----------------ket su kien mic------------
         //-----------------su kien loa---------------
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager.setSpeakerphoneOn(false);
         btn_speaker = findViewById(R.id.btn_speaker);
         btn_speaker.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,6 +127,19 @@ public class CallOutgoingActivity extends AppCompatActivity {
             call.terminate();
         }
         finish();
+    }
+
+    private void toggleMic() {
+        core.enableMic(!core.micEnabled());
+        updateMicBtnState();
+    }
+
+    private void updateMicBtnState() {
+        if (!core.micEnabled()) {
+            btn_mute.setImageResource(R.drawable.btn_mute_enable);
+        } else {
+            btn_mute.setImageResource(R.drawable.btn_mute_disable);
+        }
     }
 
     private void toggleAudio() {

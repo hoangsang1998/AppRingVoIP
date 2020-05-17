@@ -162,6 +162,9 @@ public class LoginActivity extends AppCompatActivity {
         LinphoneService.getCore().clearAllAuthInfo();
         LinphoneService.getCore().clearProxyConfig();
         // At least the 3 below values are required
+        txtUserName.setText(txtUserName.getText().toString().trim());
+        txtDomain.setText(txtDomain.getText().toString().trim());
+        txtPassword.setText(txtPassword.getText().toString().trim());
         mAccountCreator.setUsername(txtUserName.getText().toString());
         mAccountCreator.setDomain(txtDomain.getText().toString());
         mAccountCreator.setPassword(txtPassword.getText().toString());

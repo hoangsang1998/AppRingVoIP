@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.example.ringvoip.Call.CallIncommingActivity;
 import com.example.ringvoip.Call.CallOutgoingActivity;
 import com.example.ringvoip.Chat.ChatMessageClass;
 import com.example.ringvoip.Chat.ChattingActivity;
@@ -123,11 +124,14 @@ public class LinphoneService extends Service {
 //                Toast.makeText(LinphoneService.this, message, Toast.LENGTH_SHORT).show();
 
                 if (state == Call.State.IncomingReceived) {
-                    Toast.makeText(LinphoneService.this, "Incoming call received, answering it automatically", Toast.LENGTH_LONG).show();
+//                    Toast.makeText(LinphoneService.this, "Incoming call received, answering it automatically", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent().setClass(LinphoneService.this, CallIncommingActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
                     // For this sample we will automatically answer incoming calls
-                    CallParams params = getCore().createCallParams(call);
-                    params.enableVideo(true);
-                    call.acceptWithParams(params);
+//                    CallParams params = getCore().createCallParams(call);
+//                    params.enableVideo(true);
+//                    call.acceptWithParams(params);
                 } else if (state == Call.State.OutgoingInit) {
                     // This stats means the call has been established, let's start the call activity
                     Intent intent = new Intent().setClass(LinphoneService.this, CallOutgoingActivity.class);
