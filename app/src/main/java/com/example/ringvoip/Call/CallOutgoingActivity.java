@@ -2,11 +2,13 @@ package com.example.ringvoip.Call;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.View;
 import android.widget.Chronometer;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +26,7 @@ import org.linphone.core.CoreListenerStub;
 import static com.example.ringvoip.Chat.ChattingActivity.getChatRoomByTwoUsername;
 import static com.example.ringvoip.Chat.ChattingActivity.getStringDateTime;
 import static com.example.ringvoip.Chat.ChattingActivity.getStringDateTimeChatRoom;
+import static com.example.ringvoip.Chat.ChattingActivity.start;
 
 public class CallOutgoingActivity extends AppCompatActivity {
 
@@ -35,6 +38,8 @@ public class CallOutgoingActivity extends AppCompatActivity {
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     ChatMessageClass chatMessage;
     ChatRoomClass chatRoomClass;
+    private AudioManager mAudioManager;
+    ImageButton btn_speaker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +51,16 @@ public class CallOutgoingActivity extends AppCompatActivity {
         }catch (Exception ex){
 
         }
-
+        //-----------------su kien loa---------------
+        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        btn_speaker = findViewById(R.id.btn_speaker);
+        btn_speaker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleAudio();
+            }
+        });
+        //--------------------ket ham----------------
         chrono_timer = findViewById(R.id.chrono_timer);
         mCoreListenerOut = new CoreListenerStub() {
             @Override
@@ -56,15 +70,18 @@ public class CallOutgoingActivity extends AppCompatActivity {
                     // We also check for released state (called a few seconds later) just in case
                     // we missed the first one
 
-//                mAudioManager.setSpeakerphoneOn(false);
+                mAudioManager.setSpeakerphoneOn(false);
 
 //                    Toast.makeText(CallOutgoingActivity.this, "Máy bận", Toast.LENGTH_SHORT).show();
                     finish();
                 }
                 else if (state == Call.State.Released) {
-
-                    pushToDatabase(call);
-                    finish();
+                    // Get elapsed time in milliseconds
+                    long elapsedTimeMillis = System.currentTimeMillis()-start;
+                    if(elapsedTimeMillis >= 2000) {
+                        pushToDatabase(call);
+                        finish();
+                    }
 
                 }
                 else if (state == Call.State.Connected) {
@@ -78,6 +95,7 @@ public class CallOutgoingActivity extends AppCompatActivity {
         };
         LinphoneService.getCore().addListener(mCoreListenerOut);
     }
+
 
     @Override
     protected void onDestroy() {
@@ -98,6 +116,19 @@ public class CallOutgoingActivity extends AppCompatActivity {
         finish();
     }
 
+    private void toggleAudio() {
+        mAudioManager.setSpeakerphoneOn(!mAudioManager.isSpeakerphoneOn());
+        updateSpeakerBtnState();
+    }
+
+    private void updateSpeakerBtnState() {
+        if (mAudioManager.isSpeakerphoneOn()) {
+            btn_speaker.setImageResource(R.drawable.btn_speaker_enable);
+        } else {
+            btn_speaker.setImageResource(R.drawable.btn_speaker_disable);
+        }
+    }
+
     private void pushToDatabase(Call call) {
         Call.Status callstatus = call.getCallLog().getStatus();
         String callFrom = call.getCallLog().getFromAddress().getUsername();
@@ -107,9 +138,14 @@ public class CallOutgoingActivity extends AppCompatActivity {
         db_chatLog = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatlogs/" + chatRoom);
         db_chatRoom = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/chatrooms/" + chatRoom);
 
-        String duration = String.valueOf(call.getDuration());//getDuration(call);
+        String duration = getDuration(call);
 
-        chatMessage = new ChatMessageClass(callTo, duration, getStringDateTime(), callstatus.toString());
+        if(callstatus.toString().equals("Aborted") || callstatus.toString().equals("Success")) {//tự mình tắt máy
+            chatMessage = new ChatMessageClass(callFrom, duration, getStringDateTime(), callstatus.toString());
+        } else {
+            chatMessage = new ChatMessageClass(callTo, duration, getStringDateTime(), callstatus.toString());
+        }
+
         db_chatLog.push().setValue(chatMessage);
 
         chatRoomClass = new ChatRoomClass(callFrom, callTo, "", getStringDateTimeChatRoom());
@@ -123,5 +159,24 @@ public class CallOutgoingActivity extends AppCompatActivity {
             chatRoomClass.setContext("Call " + callstatus);
         }
         db_chatRoom.setValue(chatRoomClass);
+    }
+
+    public static String getDuration(Call call) {
+        int intTimerInSec = call.getCallLog().getDuration();
+
+        String timer;
+        if (intTimerInSec < 60) {
+            timer = intTimerInSec + "s";
+        } else if (intTimerInSec < 3600) {
+            int timerInMin = intTimerInSec / 60;
+            int timerInSec = intTimerInSec % 60;
+            timer = timerInMin + "m" + timerInSec + "s";
+        } else {
+            int timerInHour = intTimerInSec / 3600;
+            int timerInMin = (intTimerInSec % 3600) / 60;
+            int timerInSec = intTimerInSec - 3600 * timerInHour - 60 * timerInMin;
+            timer = timerInHour + "h" + timerInMin + "m" + timerInSec + "s";
+        }
+        return timer;
     }
 }

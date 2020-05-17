@@ -61,7 +61,7 @@ public class AdapterConversation extends RecyclerView.Adapter<RecyclerView.ViewH
                 return ENDCALLYOU;
             }
 
-        } else if (chatMessages.get(position).getType().equals("Declined")) {
+        } else if (chatMessages.get(position).getType().equals("Declined") || chatMessages.get(position).getType().equals("Aborted")) {
 
             if (chatMessages.get(position).getUsername().equals(username)) {
                 return DECLINEDME;
@@ -121,11 +121,11 @@ public class AdapterConversation extends RecyclerView.Adapter<RecyclerView.ViewH
                 View v6 = inflater.inflate(R.layout.layout_endcall_you, parent, false);
                 viewHolder = new HolderEndCallYou(v6);
                 break;
-            case DECLINEDME:
+            case DECLINEDME://ben phai
                 View v7 = inflater.inflate(R.layout.layout_declinedcall_me, parent, false);
                 viewHolder = new HolderMissedCallMe(v7);
                 break;
-            default:
+            default://ben trai
                 View v8 = inflater.inflate(R.layout.layout_declinedcall_you, parent, false);
                 viewHolder = new HolderMissedCallYou(v8);
                 break;

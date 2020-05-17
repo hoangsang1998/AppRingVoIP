@@ -6,10 +6,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Chronometer;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,6 +46,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static com.example.ringvoip.Call.CallOutgoingActivity.getDuration;
+
 public class ChattingActivity extends AppCompatActivity {
 
     TextView txtFriendName;
@@ -58,6 +63,8 @@ public class ChattingActivity extends AppCompatActivity {
     ChatRoomClass chatroomlog;
     Query listMessage;
     CoreListenerStub coreListenerStub;
+    public static long start;
+    long elapsedTimeMillis;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,9 +121,18 @@ public class ChattingActivity extends AppCompatActivity {
 
             @Override
             public void onCallStateChanged(Core core, Call call, Call.State state, String message) {
-                if (state == Call.State.Released) {
-                    newMessage1 = new ChatMessageClass(call.getCallLog().getFromAddress().getUsername()
-                            , String.valueOf(call.getDuration()), getStringDateTime(), call.getCallLog().getStatus().toString());
+                // Get elapsed time in milliseconds
+                elapsedTimeMillis = System.currentTimeMillis()-start;
+
+                if (state == Call.State.Released && elapsedTimeMillis >= 2000) {
+                    Call.Status callstatus = call.getCallLog().getStatus();
+                    if(callstatus.toString().equals("Aborted") || callstatus.toString().equals("Success")) {//tự mình tắt máy
+                        newMessage1 = new ChatMessageClass(call.getCallLog().getFromAddress().getUsername(), getDuration(call), getStringDateTime(), call.getCallLog().getStatus().toString());
+                    } else {
+                        newMessage1 = new ChatMessageClass(call.getCallLog().getToAddress().getUsername(), getDuration(call), getStringDateTime(), call.getCallLog().getStatus().toString());
+                    }
+
+
                     arrayList.add(newMessage1);
                     if(adapterConversation == null) {
                         chatBoxView(0);
@@ -162,8 +178,14 @@ public class ChattingActivity extends AppCompatActivity {
         if (addressToCall != null) {
             core.inviteAddressWithParams(addressToCall, params);
         }
-//        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
-//        startActivity(intentCallVideo);
+        //------------------
+        // Get current time
+        start = System.currentTimeMillis();
+
+        // Do something ...
+
+
+
     }
 
     public void btnCallEvent(View view) {
@@ -176,8 +198,9 @@ public class ChattingActivity extends AppCompatActivity {
         if (addressToCall != null) {
             core.inviteAddressWithParams(addressToCall, params);
         }
-//        Intent intentCallVideo = new Intent(this, CallOutgoingActivity.class);
-//        startActivity(intentCallVideo);
+        //-----------------------------
+        // Get current time
+        start = System.currentTimeMillis();
     }
 
     public void imgFriendEvent(View view) {
@@ -233,6 +256,8 @@ public class ChattingActivity extends AppCompatActivity {
         }
         txtMessage.setText("");
     }
+
+
 
     private void addVariables() {
         Intent intent = getIntent();
