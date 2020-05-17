@@ -206,7 +206,12 @@ public class CallOutgoingActivity extends AppCompatActivity {
         core.setNativePreviewWindowId(mTextureLocalPreview);
 
         mTextCallee = findViewById(R.id.text_callee);
-        mTextCallee.setText(LinphoneService.getCore().getCurrentCall().getRemoteAddress().getUsername());
+        try {
+            mTextCallee.setText(LinphoneService.getCore().getCurrentCall().getRemoteAddress().getUsername());
+        } catch (Exception ex) {
+
+        }
+
         mCallTimer = findViewById(R.id.call_timer);
 
         mImageCallee = findViewById(R.id.image_callee);
