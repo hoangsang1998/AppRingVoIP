@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -16,6 +17,8 @@ import org.linphone.core.CallParams;
 import org.linphone.core.Core;
 import org.linphone.core.CoreListenerStub;
 
+import static com.example.ringvoip.Call.CallOutgoingActivity.mCallTimer;
+
 public class CallIncommingActivity extends AppCompatActivity {
 
     TextView txtv_caller;
@@ -23,6 +26,7 @@ public class CallIncommingActivity extends AppCompatActivity {
     ImageButton btn_decline;
     private CoreListenerStub mListenerCallIn;
     private Call mCall;
+    public static boolean isCallIncommingActivity = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +66,9 @@ public class CallIncommingActivity extends AppCompatActivity {
             @Override
             public void onCallStateChanged(Core core, Call call, Call.State state, String message) {
                 if (state == Call.State.Connected) {
-
+                    isCallIncommingActivity = true;
                     startActivity(new Intent(CallIncommingActivity.this, CallOutgoingActivity.class));
+
                     finish();
                 } else if (state == Call.State.End || state == Call.State.Released) {
                     // Once call is finished (end state), terminate the activity

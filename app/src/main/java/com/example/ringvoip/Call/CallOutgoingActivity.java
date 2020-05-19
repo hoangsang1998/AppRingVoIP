@@ -35,6 +35,7 @@ import org.linphone.core.CoreListenerStub;
 import org.linphone.core.Reason;
 import org.linphone.core.tools.Log;
 
+import static com.example.ringvoip.Call.CallIncommingActivity.isCallIncommingActivity;
 import static com.example.ringvoip.Chat.ChattingActivity.getChatRoomByTwoUsername;
 import static com.example.ringvoip.Chat.ChattingActivity.getStringDateTime;
 import static com.example.ringvoip.Chat.ChattingActivity.getStringDateTimeChatRoom;
@@ -213,6 +214,14 @@ public class CallOutgoingActivity extends AppCompatActivity {
         }
 
         mCallTimer = findViewById(R.id.call_timer);
+        if (isCallIncommingActivity) {
+            Call call = LinphoneService.getCore().getCalls()[0];
+            mCallTimer.setVisibility(View.VISIBLE);
+            mCallTimer.setBase(SystemClock.elapsedRealtime() - 1000 * call.getDuration());
+            mCallTimer.start();
+            isCallIncommingActivity = false;
+//            updateInterfaceDependingOnVideo();
+        }
 
         mImageCallee = findViewById(R.id.image_callee);
     }
@@ -354,10 +363,10 @@ public class CallOutgoingActivity extends AppCompatActivity {
     private void updateSpeakerButtonState(boolean isUsing){
         if(isUsing){
 //            mButtonSpeaker.setBackgroundResource(R.drawable.btn_call_disabled);
-            mButtonSpeaker.setImageResource(R.drawable.ic_volume_up_white_24dp);
+            mButtonSpeaker.setImageResource(R.drawable.ic_volume_off_black_24dp);
         } else {
 //            mButtonSpeaker.setBackgroundResource(R.drawable.btn_call_enabled);
-            mButtonSpeaker.setImageResource(R.drawable.ic_volume_off_black_24dp);
+            mButtonSpeaker.setImageResource(R.drawable.ic_volume_up_white_24dp);
         }
     }
 
