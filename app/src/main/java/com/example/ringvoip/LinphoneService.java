@@ -253,7 +253,8 @@ public class LinphoneService extends Service {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
-                .setSmallIcon(R.drawable.notification_icon)
+                //.setSmallIcon(R.drawable.notification_icon)
+                .setSmallIcon(android.R.drawable.ic_popup_reminder)
                 .setContentTitle(friendName)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)

@@ -94,7 +94,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     finish();
                 } else if (state == RegistrationState.Failed) {
-                    Toast.makeText(LoginActivity.this, "Failure: " + message, Toast.LENGTH_LONG).show();
+                    Toast.makeText(LoginActivity.this, "Đăng nhập không thành công.", Toast.LENGTH_LONG).show();
                 }
             }
         };
