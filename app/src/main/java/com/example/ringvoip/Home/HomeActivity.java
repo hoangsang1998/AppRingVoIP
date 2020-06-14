@@ -272,7 +272,7 @@ public class HomeActivity extends AppCompatActivity implements AdapterChatRoom.D
         builder.setTitle("RingVoIP");
         builder.setMessage("Bạn có muốn thoát không?");
         builder.setCancelable(false);
-        builder.setPositiveButton("Ứ chịu", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Không", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 //                Toast.makeText(HomeActivity.this, "Không thoát được", Toast.LENGTH_SHORT).show();

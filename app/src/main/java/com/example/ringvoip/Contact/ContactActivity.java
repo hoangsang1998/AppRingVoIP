@@ -241,7 +241,7 @@ public class ContactActivity extends AppCompatActivity implements AdapterContact
         builder.setTitle("RingVoIP");
         builder.setMessage("Bạn có muốn thoát không?");
         builder.setCancelable(false);
-        builder.setPositiveButton("Ứ chịu", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Không", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 //                Toast.makeText(ContactActivity.this, "Không thoát được", Toast.LENGTH_SHORT).show();
