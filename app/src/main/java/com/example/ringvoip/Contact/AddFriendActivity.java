@@ -40,7 +40,7 @@ public class AddFriendActivity extends AppCompatActivity {
         etxt_add_username.setText(etxt_add_username.getText().toString().trim());
         etxt_add_username_Stringtype = etxt_add_username.getText().toString();
         if (etxt_add_username_Stringtype.trim().equals(username)) {
-            Toast.makeText(getApplicationContext(), "Cannot add friend to yourself", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Không thể thêm chính mình", Toast.LENGTH_SHORT).show();
         } else if (!etxt_add_username_Stringtype.trim().equals("")) {
 
             //Check whether the contact has existed yet
@@ -52,7 +52,7 @@ public class AddFriendActivity extends AppCompatActivity {
                     for (DataSnapshot each_contact : dataSnapshot.getChildren()) {
                         ContactClass check_contact = each_contact.getValue(ContactClass.class);
                         if (check_contact.getName().equals(etxt_add_username_Stringtype)) {
-                            Toast.makeText(getApplicationContext(), "This user has already added", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "Người này đã có rồi", Toast.LENGTH_SHORT).show();
                             return;
                         }
                     }
@@ -61,7 +61,7 @@ public class AddFriendActivity extends AppCompatActivity {
                             "sip:" + etxt_add_username_Stringtype + "@" + LinphoneService.getCore().getIdentity().split("@")[1]);
                     db_Contact.child(etxt_add_username_Stringtype).setValue(check_contact);
 
-                    Toast.makeText(getApplicationContext(), "Successfully adding contact", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Thêm thành công", Toast.LENGTH_SHORT).show();
 
                     existedContacts.removeEventListener(this);
                     etxt_add_username.setText("");
@@ -73,7 +73,7 @@ public class AddFriendActivity extends AppCompatActivity {
                 }
             });
         } else {
-            Toast.makeText(getApplicationContext(), "Please enter", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Vui lòng nhập vào ô", Toast.LENGTH_SHORT).show();
         }
 
 //        Intent intentContact = new Intent(this, ContactActivity.class);

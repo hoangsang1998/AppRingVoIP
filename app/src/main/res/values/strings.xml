@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">BobAlice</string>
+    <string name="app_name">RingVoIP</string>
     <string name="domain">Domain</string>
     <string name="type_a_message">Tin nhắn</string>
     <string name="channel_name">Noti</string>
@@ -7,7 +7,7 @@
 
     <string name="error_unknown">Unknown error</string>
     <string name="error_call_declined">Call declined</string>
-    <string name="error_user_busy">User busy</string>
-    <string name="error_user_not_found">User not found</string>
+    <string name="error_user_busy">Người dùng bận</string>
+    <string name="error_user_not_found">Người dùng không trực tuyến</string>
     <string name="error_incompatible_media">Incompatible media parameters</string>
 </resources>

@@ -37,7 +37,7 @@ public class ProfileFriendActivity extends AppCompatActivity {
         addVariables();
         Intent intent = getIntent();
         txtName.setText(intent.getStringExtra("userFriend"));
-        txtSip.setText(intent.getStringExtra("sipUri"));
+//        txtSip.setText(intent.getStringExtra("sipUri"));
     }
 
     @Override

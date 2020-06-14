@@ -26,7 +26,7 @@
             android:id="@+id/txtUserName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="sang"
+            android:text="text"
             android:textColor="#fff"
             android:paddingVertical="0dp"
             android:layout_marginLeft="5dp"

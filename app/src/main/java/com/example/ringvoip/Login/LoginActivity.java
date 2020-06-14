@@ -105,6 +105,7 @@ public class LoginActivity extends AppCompatActivity {
         txtPassword = findViewById(R.id.etxt_password);
         txtDomain = findViewById(R.id.etxt_domain);
         btnLogin = findViewById(R.id.btn_login);
+        txtDomain.setVisibility(View.INVISIBLE);
     }
 
     public void onBackPressed() {
@@ -166,7 +167,7 @@ public class LoginActivity extends AppCompatActivity {
         txtDomain.setText(txtDomain.getText().toString().trim());
         txtPassword.setText(txtPassword.getText().toString().trim());
         mAccountCreator.setUsername(txtUserName.getText().toString());
-        mAccountCreator.setDomain(txtDomain.getText().toString());
+        mAccountCreator.setDomain("103.150.124.25");
         mAccountCreator.setPassword(txtPassword.getText().toString());
 
         // By default it will be UDP if not set, but TLS is strongly recommended

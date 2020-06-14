@@ -32,7 +32,8 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
         txtUserName = findViewById(R.id.txtv_name);
         database = FirebaseDatabase.getInstance();
-        txtUserName.setText(LinphoneService.getCore().getIdentity());
+        String temp = LinphoneService.getCore().getIdentity().split(":")[1];
+        txtUserName.setText(temp.split("@")[0]);
     }
 
     public void btnBackEvent(View view) {
@@ -52,8 +53,8 @@ public class ProfileActivity extends AppCompatActivity {
 
         //Set offline
         try {
-            String temp = txtUserName.getText().toString().split("@")[0];
-            String userLogOut = temp.split(":")[1];
+            String userLogOut = txtUserName.getText().toString().split("@")[0];
+//            String  = temp.split(":")[1];
             final DatabaseReference db_theUserLogin = database.getReferenceFromUrl("https://dbappchat-bbabc.firebaseio.com/users/" + userLogOut);
             db_theUserLogin.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
